@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Prediction</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="./football_prediction_model_lstm/model.json"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Football Prediction Model</h1>
+        <form id="predictionForm">
+            <label for="homeTeamPoints">Home Team Points:</label>
+            <input type="number" id="homeTeamPoints" required><br>
+
+            <label for="awayTeamPoints">Away Team Points:</label>
+            <input type="number" id="awayTeamPoints" required><br>
+
+            <!-- Add other inputs -->
+
+            <button type="submit">Predict Outcome</button>
+        </form>
+        <div id="predictionResult"></div>
+    </div>
+
+    <script>
+        async function loadModel() {
+            const model = await tf.loadLayersModel('./football_prediction_model_lstm/model.json');
+
+            document.getElementById("predictionForm").addEventListener("submit", async function(event) {
+                event.preventDefault();
+                let homeTeamPoints = parseFloat(document.getElementById("homeTeamPoints").value);
+                let awayTeamPoints = parseFloat(document.getElementById("awayTeamPoints").value);
+
+                let inputTensor = tf.tensor2d([[homeTeamPoints, awayTeamPoints /* other inputs */]]);
+
+                let prediction = model.predict(inputTensor);
+                let result = prediction.argMax(-1).dataSync()[0];
+                document.getElementById("predictionResult").innerHTML = `Prediction: ${['Home Win', 'Draw', 'Away Win'][result]}`;
+            });
+        }
+
+        loadModel();
+    </script>
+</body>
+</html>
